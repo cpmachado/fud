@@ -13,25 +13,19 @@ import (
 func main() {
 	port := 1337
 	msg := "This is up"
-	version := false
+	versionFlag := false
 
 	flag.IntVar(&port, "port", port, "port to serve")
 	flag.StringVar(&msg, "msg", msg, "message to show")
-	flag.BoolVar(&version, "v", version, "display version")
+	flag.BoolVar(&versionFlag, "v", versionFlag, "display version")
 	flag.Parse()
 
 	if port < 0 || port > 60999 {
 		log.Fatalf("invalid port: %d", port)
 	}
 
-	if version {
-		info, ok := debug.ReadBuildInfo()
-		version := "unknown"
-
-		if ok {
-			version = info.Main.Version
-		}
-		log.Printf("fud-%s", version)
+	if versionFlag {
+		log.Printf("fud-%s", version())
 		os.Exit(0)
 	}
 
@@ -83,4 +77,14 @@ func main() {
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func version() string {
+	info, ok := debug.ReadBuildInfo()
+	version := "unknown"
+
+	if ok {
+		version = info.Main.Version
+	}
+	return version
 }
