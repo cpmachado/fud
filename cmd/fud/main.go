@@ -46,16 +46,36 @@ func main() {
 		Handler: mux,
 	}
 
+	if err := logIps(port); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := server.ListenAndServe(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func version() string {
+	info, ok := debug.ReadBuildInfo()
+	version := "unknown"
+
+	if ok {
+		version = info.Main.Version
+	}
+	return version
+}
+
+func logIps(port int) error {
 	var ips []string
 
 	ifaces, err := net.Interfaces()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	for _, i := range ifaces {
 		addrs, err := i.Addrs()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		for _, addr := range addrs {
 			var ip net.IP
@@ -73,18 +93,5 @@ func main() {
 	for _, ip := range ips {
 		log.Printf("- http://%s:%d\n", ip, port)
 	}
-
-	if err := server.ListenAndServe(); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func version() string {
-	info, ok := debug.ReadBuildInfo()
-	version := "unknown"
-
-	if ok {
-		version = info.Main.Version
-	}
-	return version
+	return nil
 }
